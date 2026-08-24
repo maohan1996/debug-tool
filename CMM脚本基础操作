@@ -90,6 +90,8 @@ Data.SAVE.Binary E:\aaa.log linux_banner++100
 
 基础调试步骤以及脚本： https://cloud.tencent.com/developer/article/2042369
 
+包含调试时候复位cpu，设置jtag clk，初始化cpu向量表，执行代码step、over等方法
+
 https://blog.csdn.net/thanklife/article/details/119608383
  
 http://www.chinasem.cn/article/170935
@@ -103,4 +105,4 @@ https://blog.csdn.net/good_grape/article/details/141898461
 知乎4个专题：
 https://thanklife.blog.csdn.net/article/details/119608383?spm=1001.2101.3001.6650.17&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-17-119608383-blog-6736418.235%5Ev43%5Econtrol&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-17-119608383-blog-6736418.235%5Ev43%5Econtrol&utm_relevant_index=23
  
-包含调试时候复位cpu，设置jtag clk，初始化cpu向量表，执行代码step、over等方法
+
