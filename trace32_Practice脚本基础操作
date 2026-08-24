@@ -2,10 +2,10 @@
 area //这个的含义是指打开窗口，这样容易看输出信息
  
 LOCAL &get_val //定义局部变量
-&get_val = data.long(D:0x20544114)//赋值的"="两边可以带空格，里面的D:是地址类型前缀，本句是从地址0x20544114取值
+&get_val = data.long(D:0x20000000)//赋值的"="两边可以带空格，里面的D:是地址类型前缀，本句是从地址0x20544114取值
 &get_val = ((&get_val)&(~0xFF))|(0x1)//注意后面运算符两边不可以带空格，不然报错
-D.S EZAXI:0x20544114 %LE %Long &get_val//此句是指将&get_val中的数值写入到地址中
-&get_val = data.long(D:0x2054001C)>>24.//此句中注意，后面数据24后面带了一个"."指明24是一个十进制数
+D.S EZAXI:0x20000000 %LE %Long &get_val//此句是指将&get_val中的数值写入到地址中
+&get_val = data.long(D:0x20000000)>>24.//此句中注意，后面数据24后面带了一个"."指明24是一个十进制数
 PRINT "CBlaneobc=0x01:" &get_val//打印的函数比较自由，标识符可以小写"print"，字符串和数据顺序可以随意摆放和穿插
   
 local &i
@@ -21,20 +21,20 @@ rd_phy_offset://子函数
      entry &coef_sel //这个是形参，想定义多少个就在后面一直添加就行了
      local &reg_val &i
      &i = 0
-     &reg_val = data.long(D:0x20544078)
+     &reg_val = data.long(D:0x20000000)
      &reg_val = &reg_val&(~0xFF<<1.)|(&coef_sel<<1.)
      D.S EZAXI:0x20544078 %LE %Long &reg_val
      if &coef_sel==0x2 
      (
          while &i<0x11
          (
-             &reg_val = data.long(D:0x20544038)
+             &reg_val = data.long(D:0x20000000)
              &reg_val = &reg_val&(~0x1F<<14.)|(&i<<14.)
-             D.S EZAXI:0x20544038 %LE %Long &reg_val
-             &reg_val = data.long(D:0x2054415c)
+             D.S EZAXI:0x20000000 %LE %Long &reg_val
+             &reg_val = data.long(D:0x20000000)
              print "lane0coef_sel=0x2,ctle_sel=0x" &i ",coef_out=0x" (&reg_val>>9.)&0x3FF
              
-             &reg_val = data.long(D:0x205441a4)
+             &reg_val = data.long(D:0x20000000)
              print "lane1coef_sel=0x2,ctle_sel=0x" &i ",coef_out=0x" (&reg_val)&0x3FF
              
              &i = &i+1
@@ -42,10 +42,10 @@ rd_phy_offset://子函数
      )
      else
      (
-         &reg_val = data.long(D:0x2054415c)
+         &reg_val = data.long(D:0x20000000)
          print "lane0coef_sel=0x" &coef_sel ",coef_out=0x" (&reg_val>>9.)&0x3FF
          
-         &reg_val = data.long(D:0x205441a4)
+         &reg_val = data.long(D:0x20000000)
          print "lane1coef_sel=0x" &coef_sel ",coef_out=0x" (&reg_val)&0x3FF
      )
 return
