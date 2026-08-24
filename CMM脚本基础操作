@@ -1,0 +1,92 @@
+//------------------------------------------------------------------------------------------------------
+area //这个的含义是指打开窗口，这样好看输出
+ 
+LOCAL &get_val //定义局部变量
+&get_val = data.long(D:0x20544114)//赋值的"="两边可以带空格，里面的D:是地址类型前缀，本句是从地址0x20544114取值
+&get_val = ((&get_val)&(~0xFF))|(0x1)//注意后面运算符两边不可以带空格，不然报错
+D.S EZAXI:0x20544114 %LE %Long &get_val//此句是指将&get_val中的数值写入到地址中
+&get_val = data.long(D:0x2054001C)>>24.//此句中注意，后面数据24后面带了一个"."指明24是一个十进制数
+PRINT "CBlaneobc=0x01:" &get_val//打印的函数比较自由，标识符可以小写"print"，字符串和数据顺序可以随意摆放和穿插
+  
+local &i
+&i = 0
+while &i<=0xc //注意，"&i<=0xc"这个小于等于判断符号两边也是不可以有空格的
+(//注意，小括号是不能像c语言一样跟while、if放在一行的，必须另起一行
+      gosub rd_phy_offset &i //gosub是一个标识符，表示调用函数rd_phy_offset，后面是传入的形参
+      &i = &i+1 //parctice语句里面没有"++"只能用这种方式+1)
+ 
+enddo//这个代表执行到这里就结束了
+//*******************************************************************************************
+rd_phy_offset://子函数
+     entry &coef_sel //这个是形参，想定义多少个就在后面一直添加就行了
+     local &reg_val &i
+     &i = 0
+     &reg_val = data.long(D:0x20544078)
+     &reg_val = &reg_val&(~0xFF<<1.)|(&coef_sel<<1.)
+     D.S EZAXI:0x20544078 %LE %Long &reg_val
+     if &coef_sel==0x2 
+     (
+         while &i<0x11
+         (
+             &reg_val = data.long(D:0x20544038)
+             &reg_val = &reg_val&(~0x1F<<14.)|(&i<<14.)
+             D.S EZAXI:0x20544038 %LE %Long &reg_val
+             &reg_val = data.long(D:0x2054415c)
+             print "lane0coef_sel=0x2,ctle_sel=0x" &i ",coef_out=0x" (&reg_val>>9.)&0x3FF
+             
+             &reg_val = data.long(D:0x205441a4)
+             print "lane1coef_sel=0x2,ctle_sel=0x" &i ",coef_out=0x" (&reg_val)&0x3FF
+             
+             &i = &i+1
+         )
+     )
+     else
+     (
+         &reg_val = data.long(D:0x2054415c)
+         print "lane0coef_sel=0x" &coef_sel ",coef_out=0x" (&reg_val>>9.)&0x3FF
+         
+         &reg_val = data.long(D:0x205441a4)
+         print "lane1coef_sel=0x" &coef_sel ",coef_out=0x" (&reg_val)&0x3FF
+     )
+return
+ 
+//* 向寄存器里写值 （&addr 寄存器地址 - &mask 选中某些bit - &value 写入值） *******************************************
+reg_mask_write:
+  entry &addr &mask &value
+  local &tmp_val
+  &tmp_val = data.long(D:&addr)
+  &tmp_val = (&tmp_val)&(~&mask)|(&value)
+  D.S EZAXI:&addr %LE %Long &tmp_val
+return
+ 
+//WAIT 1000ms//这个是延时函数，要是想用秒，就直接把参数改成"1s"这样，如果是us就改成"1us"
+ENDDO
+ 
+//-------------------------------------------------------------------------------------------------------------
+//保存到txt文本
+&i = 0xcc
+ 
+//打开文本，这个文本应当是和脚本在同一个目录下，用/write表示是写模式，会顺着文本的末尾跟着写，注意文本名 func_test.txt 不能加引号
+OPEN #2 func_test.txt /write
+ 
+//打开文本 #1类似文件句柄  后面是文件名  /create必须加在最后，这是创建一个文件
+open  #1  C:\Users\han.mao\Desktop\test.txt /create 
+//写入文本
+write #1 " 2 \n" &i "dada\n"
+close #1 //关闭文件
+enddo
+ 
+//--------------------------------------------------------------------------------------------------------------
+ 
+TRACE32调试技巧： http://www.dumpstack.cn/index.php/2022/02/25/398.html
+ 
+加载elf文件命令，把指定的elf文件加载到目标设备或者仿真设备的0x1488800000地址上去。elf文件在编译时会把源文件的路径加入到elf文件中，我们后面加上/nocode代表没有对应的源码，trace32就不会去对应目录去查找源文件了。当然我们也可以通过/path来指定源码所在的目录，如下
+Data.LOAD.Elf T:\vmlinux
+Data.LOAD.Elf T:\vmlinux 0x1488800000 /nocode
+Data.LOAD.Elf T:\vmlinux 0x1488800000 /path T:\
+ 
+执行下面命令可以将一个数组里面的所有字符串导出来
+Data.SAVE.Binary E:\aaa.log linux_banner++100
+ 
+基础调试步骤以及脚本： https://cloud.tencent.com/developer/article/2042369
+包含调试时候复位cpu，设置jtag clk，初始化cpu向量表，执行代码step、over等方法
